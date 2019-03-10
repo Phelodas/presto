@@ -79,6 +79,8 @@ import com.facebook.presto.sql.tree.GroupingElement;
 import com.facebook.presto.sql.tree.GroupingOperation;
 import com.facebook.presto.sql.tree.GroupingSets;
 import com.facebook.presto.sql.tree.Identifier;
+import com.facebook.presto.sql.tree.InListExpression;
+import com.facebook.presto.sql.tree.InPredicate;
 import com.facebook.presto.sql.tree.Insert;
 import com.facebook.presto.sql.tree.Intersect;
 import com.facebook.presto.sql.tree.Join;
@@ -186,6 +188,7 @@ import static com.facebook.presto.sql.analyzer.SemanticErrorCode.NONDETERMINISTI
 import static com.facebook.presto.sql.analyzer.SemanticErrorCode.NON_NUMERIC_SAMPLE_PERCENTAGE;
 import static com.facebook.presto.sql.analyzer.SemanticErrorCode.NOT_SUPPORTED;
 import static com.facebook.presto.sql.analyzer.SemanticErrorCode.ORDER_BY_MUST_BE_IN_SELECT;
+import static com.facebook.presto.sql.analyzer.SemanticErrorCode.RLS_PREDICATE_IS_RECURSIVE;
 import static com.facebook.presto.sql.analyzer.SemanticErrorCode.TABLE_ALREADY_EXISTS;
 import static com.facebook.presto.sql.analyzer.SemanticErrorCode.TOO_MANY_GROUPING_SETS;
 import static com.facebook.presto.sql.analyzer.SemanticErrorCode.TYPE_MISMATCH;
@@ -918,7 +921,54 @@ class StatementAnalyzer
 
             analysis.registerTable(table, tableHandle.get());
 
+            // if (// there is security) && not already in the row level security predicate of the table
+            if (checkRecursionInRLS(table)) {
+                // TODO Add WHERE
+                Expression literal = new LongLiteral("1");
+                List<Expression> inValueList = new ArrayList<Expression>();
+                inValueList.add(literal);
+                InListExpression inListExpr = new InListExpression(inValueList);
+                InPredicate inListPred = new InPredicate(new Identifier("one"), inListExpr);
+
+                QuerySpecification querySpec =
+                        new QuerySpecification(
+                                new Select(false, ImmutableList.of(new AllColumns(true))),
+                                Optional.of(new Table(table.getName(), true)),
+                                Optional.of(inListPred), /* WHERE */
+                                Optional.empty(), /* GROUP BY */
+                                Optional.empty(), /* HAVING */
+                                Optional.empty(), /* ORDER BY */
+                                Optional.empty()); /* LIMIT */
+                Query rlsStatement =
+                        new Query(Optional.empty(), querySpec, Optional.empty(), Optional.empty());
+                analysis.registerTableForRLS(table); // checking for recursive table reference and also to avoid row level checks on the table
+                StatementAnalyzer rlsAnalyzer = new StatementAnalyzer(analysis, metadata, sqlParser, accessControl, session, WarningCollector.NOOP);
+                Scope queryScope = rlsAnalyzer.analyze(rlsStatement, Scope.create());
+                analysis.unregisterTableForRLS(table);
+
+                analysis.registerNamedQueryForRLS(table, rlsStatement);
+            }
+
             return createAndAssignScope(table, scope, fields.build());
+        }
+
+        private boolean checkRecursionInRLS(Table table)
+        {
+            /*
+             * RLS rewrite predicate will transform a table reference to a sub query :
+             * SELECT * FROM tab1 => SELECT * FROM (SELECT * FROM tab1 WHERE col1 IN (value1, value2);
+             * Therefore, when your process tab1 for rewrite, the query will contain one reference of tab1
+             * which we shouldn't process again for rewrite since that will result in a recursive loop.
+             * However, the WHERE predicate returned from AccessControl should not contain any more references to tab1.
+             */
+
+            if (table.isPlaceholderForRLS()) {
+                return true;
+            }
+            if (analysis.hasTableInRLS(table)) {
+                throw new SemanticException(RLS_PREDICATE_IS_RECURSIVE, table, "Recursive row level security predicate detected");
+            }
+            return false;
         }
 
         @Override

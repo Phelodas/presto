@@ -174,6 +174,7 @@ public class ExpressionAnalyzer
     private final Function<Node, StatementAnalyzer> statementAnalyzerFactory;
     private final TypeProvider symbolTypes;
     private final boolean isDescribe;
+    private final boolean bypassTableColumnReferences;
     private final boolean legacyRowFieldOrdinalAccess;
 
     private final Map<NodeRef<FunctionCall>, Signature> resolvedFunctions = new LinkedHashMap<>();
@@ -213,6 +214,30 @@ public class ExpressionAnalyzer
         this.isDescribe = isDescribe;
         this.legacyRowFieldOrdinalAccess = isLegacyRowFieldOrdinalAccessEnabled(session);
         this.warningCollector = requireNonNull(warningCollector, "warningCollector is null");
+        this.bypassTableColumnReferences = false;
+    }
+
+    public ExpressionAnalyzer(
+            FunctionRegistry functionRegistry,
+            TypeManager typeManager,
+            Function<Node, StatementAnalyzer> statementAnalyzerFactory,
+            Session session,
+            TypeProvider symbolTypes,
+            List<Expression> parameters,
+            WarningCollector warningCollector,
+            boolean isDescribe,
+            boolean bypassTableColumnReferences)
+    {
+        this.functionRegistry = requireNonNull(functionRegistry, "functionRegistry is null");
+        this.typeManager = requireNonNull(typeManager, "typeManager is null");
+        this.statementAnalyzerFactory = requireNonNull(statementAnalyzerFactory, "statementAnalyzerFactory is null");
+        this.session = requireNonNull(session, "session is null");
+        this.symbolTypes = requireNonNull(symbolTypes, "symbolTypes is null");
+        this.parameters = requireNonNull(parameters, "parameters is null");
+        this.isDescribe = isDescribe;
+        this.legacyRowFieldOrdinalAccess = isLegacyRowFieldOrdinalAccessEnabled(session);
+        this.warningCollector = requireNonNull(warningCollector, "warningCollector is null");
+        this.bypassTableColumnReferences = bypassTableColumnReferences;
     }
 
     public Map<NodeRef<FunctionCall>, Signature> getResolvedFunctions()
@@ -410,7 +435,7 @@ public class ExpressionAnalyzer
                 }
             }
 
-            if (field.getOriginTable().isPresent() && field.getOriginColumnName().isPresent()) {
+            if (field.getOriginTable().isPresent() && field.getOriginColumnName().isPresent() && !bypassTableColumnReferences) {
                 tableColumnReferences.put(field.getOriginTable().get(), field.getOriginColumnName().get());
             }
 

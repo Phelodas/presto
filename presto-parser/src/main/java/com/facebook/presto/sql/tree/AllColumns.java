@@ -25,22 +25,30 @@ public class AllColumns
         extends SelectItem
 {
     private final Optional<QualifiedName> prefix;
+    private final boolean isPlaceholderForRLS;
 
     public AllColumns()
     {
         super(Optional.empty());
         prefix = Optional.empty();
+        this.isPlaceholderForRLS = false;
     }
 
     public AllColumns(NodeLocation location)
     {
         super(Optional.of(location));
         prefix = Optional.empty();
+        this.isPlaceholderForRLS = false;
     }
 
     public AllColumns(QualifiedName prefix)
     {
         this(Optional.empty(), prefix);
+    }
+
+    public AllColumns(boolean isPlaceholderForRLS)
+    {
+        this(Optional.empty(), Optional.empty(), isPlaceholderForRLS);
     }
 
     public AllColumns(NodeLocation location, QualifiedName prefix)
@@ -53,6 +61,14 @@ public class AllColumns
         super(location);
         requireNonNull(prefix, "prefix is null");
         this.prefix = Optional.of(prefix);
+        this.isPlaceholderForRLS = false;
+    }
+
+    private AllColumns(Optional<NodeLocation> location, Optional<QualifiedName> prefix, boolean isPlaceholderForRLS)
+    {
+        super(location);
+        this.prefix = prefix;
+        this.isPlaceholderForRLS = isPlaceholderForRLS;
     }
 
     public Optional<QualifiedName> getPrefix()

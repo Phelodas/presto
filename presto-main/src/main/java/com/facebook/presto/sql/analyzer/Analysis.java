@@ -80,6 +80,8 @@ public class Analysis
 
     private final Map<NodeRef<Table>, Query> namedQueries = new LinkedHashMap<>();
 
+    private final Map<NodeRef<Table>, Query> namedQueriesForRLS = new LinkedHashMap<>();
+
     private final Map<NodeRef<Node>, Scope> scopes = new LinkedHashMap<>();
     private final Map<NodeRef<Expression>, FieldId> columnReferences = new LinkedHashMap<>();
 
@@ -137,6 +139,9 @@ public class Analysis
 
     // for recursive view detection
     private final Deque<Table> tablesForView = new ArrayDeque<>();
+
+    // for recursive RLS detection
+    private final Deque<Table> tablesForRLS = new ArrayDeque<>();
 
     public Analysis(@Nullable Statement root, List<Expression> parameters, boolean isDescribe)
     {
@@ -584,6 +589,34 @@ public class Analysis
         requireNonNull(query, "query is null");
 
         namedQueries.put(NodeRef.of(tableReference), query);
+    }
+
+    public Query getNamedQueryForRLS(Table table)
+    {
+        return namedQueriesForRLS.get(NodeRef.of(table));
+    }
+
+    public void registerNamedQueryForRLS(Table tableReference, Query query)
+    {
+        requireNonNull(tableReference, "tableReference is null");
+        requireNonNull(query, "query is null");
+
+        namedQueriesForRLS.put(NodeRef.of(tableReference), query);
+    }
+
+    public void registerTableForRLS(Table tableReference)
+    {
+        tablesForRLS.push(requireNonNull(tableReference, "table is null"));
+    }
+
+    public void unregisterTableForRLS(Table tableReference)
+    {
+        tablesForRLS.pop();
+    }
+
+    public boolean hasTableInRLS(Table tableReference)
+    {
+        return tablesForRLS.contains(tableReference);
     }
 
     public void registerTableForView(Table tableReference)

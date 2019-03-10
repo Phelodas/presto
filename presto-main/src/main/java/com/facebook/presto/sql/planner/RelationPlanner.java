@@ -146,6 +146,21 @@ class RelationPlanner
             return new RelationPlan(withCoercions.getRoot(), scope, withCoercions.getFieldMappings());
         }
 
+        // If not a named query, this is a table reference, check whether there are RLS rewrites
+        Query namedQueryForRLS = analysis.getNamedQueryForRLS(node);
+
+        if (namedQueryForRLS != null) {
+            // analysis.registerTableForRLS(node);
+            RelationPlan subPlan = process(namedQueryForRLS, null);
+            // analysis.unregisterTableForRLS(node);
+
+            // Add implicit coercions if view query produces types that don't match the declared output types
+            // of the view (e.g., if the underlying tables referenced by the view changed)
+            // Type[] types = scope.getRelationType().getAllFields().stream().map(Field::getType).toArray(Type[]::new);
+            // RelationPlan withCoercions = addCoercions(subPlan, types);
+            return subPlan; //new RelationPlan(withCoercions.getRoot(), scope, withCoercions.getFieldMappings());
+        }
+
         TableHandle handle = analysis.getTableHandle(node);
 
         ImmutableList.Builder<Symbol> outputSymbolsBuilder = ImmutableList.builder();
