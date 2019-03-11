@@ -17,6 +17,7 @@ import com.facebook.presto.connector.ConnectorId;
 import com.facebook.presto.metadata.QualifiedObjectName;
 import com.facebook.presto.spi.CatalogSchemaName;
 import com.facebook.presto.spi.PrestoException;
+import com.facebook.presto.spi.RLSPredicate;
 import com.facebook.presto.spi.SchemaTableName;
 import com.facebook.presto.spi.connector.ConnectorAccessControl;
 import com.facebook.presto.spi.connector.ConnectorTransactionHandle;
@@ -38,7 +39,9 @@ import javax.inject.Inject;
 
 import java.io.File;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -539,6 +542,12 @@ public class AccessControlManager
         if (entry != null) {
             authorizationCheck(() -> entry.getAccessControl().checkCanSelectFromColumns(entry.getTransactionHandle(transactionId), identity, tableName.asSchemaTableName(), columnNames));
         }
+    }
+
+    @Override
+    public List<RLSPredicate> performRowLevelAuthorization(TransactionId transactionId, Identity identity, QualifiedObjectName tableName, Set<String> columnNames)
+    {
+        return new ArrayList<>();
     }
 
     private CatalogAccessControlEntry getConnectorAccessControl(TransactionId transactionId, String catalogName)

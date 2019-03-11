@@ -13,10 +13,12 @@
  */
 package com.facebook.presto.spi.connector;
 
+import com.facebook.presto.spi.RLSPredicate;
 import com.facebook.presto.spi.SchemaTableName;
 import com.facebook.presto.spi.security.Identity;
 import com.facebook.presto.spi.security.Privilege;
 
+import java.util.List;
 import java.util.Set;
 
 import static com.facebook.presto.spi.security.AccessDeniedException.denyAddColumn;
@@ -266,4 +268,12 @@ public interface ConnectorAccessControl
     {
         denyRevokeTablePrivilege(privilege.toString(), tableName.toString());
     }
+
+    /**
+     * Check the row level access restrictions for the identity.  The column set can be empty.
+     *
+     * TODO
+     * @throws com.facebook.presto.spi.security.AccessDeniedException if not allowed
+     */
+    public List<RLSPredicate> performRowLevelAuthorization(ConnectorTransactionHandle transactionHandle, Identity identity, Privilege privilege, SchemaTableName tableName, Set<String> columns);
 }

@@ -15,6 +15,7 @@ package com.facebook.presto.security;
 
 import com.facebook.presto.metadata.QualifiedObjectName;
 import com.facebook.presto.spi.CatalogSchemaName;
+import com.facebook.presto.spi.RLSPredicate;
 import com.facebook.presto.spi.SchemaTableName;
 import com.facebook.presto.spi.security.Identity;
 import com.facebook.presto.spi.security.Privilege;
@@ -22,6 +23,8 @@ import com.facebook.presto.transaction.TransactionId;
 import com.google.common.collect.ImmutableSet;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -206,5 +209,11 @@ public class DenyAllAccessControl
     public void checkCanSelectFromColumns(TransactionId transactionId, Identity identity, QualifiedObjectName tableName, Set<String> columnNames)
     {
         denySelectColumns(tableName.toString(), columnNames);
+    }
+
+    @Override
+    public List<RLSPredicate> performRowLevelAuthorization(TransactionId transactionId, Identity identity, QualifiedObjectName tableName, Set<String> columnNames)
+    {
+        return new ArrayList<>();
     }
 }

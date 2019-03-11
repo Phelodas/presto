@@ -15,10 +15,13 @@ package com.facebook.presto.spi.security;
 
 import com.facebook.presto.spi.CatalogSchemaName;
 import com.facebook.presto.spi.CatalogSchemaTableName;
+import com.facebook.presto.spi.RLSPredicate;
 import com.facebook.presto.spi.SchemaTableName;
+import com.facebook.presto.spi.connector.ConnectorTransactionHandle;
 
 import java.security.Principal;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -298,6 +301,17 @@ public interface SystemAccessControl
      * @throws com.facebook.presto.spi.security.AccessDeniedException if not allowed
      */
     default void checkCanRevokeTablePrivilege(Identity identity, Privilege privilege, CatalogSchemaTableName table, String revokee, boolean grantOptionFor)
+    {
+        denyRevokeTablePrivilege(privilege.toString(), table.toString());
+    }
+
+    /**
+     * Check the row level access restrictions for the identity.  The column set can be empty.
+     *
+     * TODO
+     * @throws com.facebook.presto.spi.security.AccessDeniedException if not allowed
+     */
+    default List<RLSPredicate> performRowLevelAuthorization(Identity identity, Privilege privilege, CatalogSchemaTableName table, Set<String> columns)
     {
         denyRevokeTablePrivilege(privilege.toString(), table.toString());
     }
