@@ -14,6 +14,7 @@
 package com.facebook.presto.connector.thrift.api.valuesets;
 
 import com.facebook.presto.spi.predicate.AllOrNoneValueSet;
+import com.facebook.presto.spi.type.BooleanType;
 import io.airlift.drift.annotations.ThriftConstructor;
 import io.airlift.drift.annotations.ThriftField;
 import io.airlift.drift.annotations.ThriftStruct;
@@ -70,5 +71,11 @@ public final class PrestoThriftAllOrNoneValueSet
     public static PrestoThriftAllOrNoneValueSet fromAllOrNoneValueSet(AllOrNoneValueSet valueSet)
     {
         return new PrestoThriftAllOrNoneValueSet(valueSet.isAll());
+    }
+
+    // TODO BOOLEAN is a placeholder since we lose type information when we convert back
+    public static AllOrNoneValueSet toAllOrNoneValueSet(PrestoThriftAllOrNoneValueSet valueSet)
+    {
+        return new AllOrNoneValueSet(BooleanType.BOOLEAN, valueSet.isAll());
     }
 }

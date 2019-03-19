@@ -15,11 +15,11 @@ package com.facebook.presto.spi.security;
 
 import com.facebook.presto.spi.CatalogSchemaName;
 import com.facebook.presto.spi.CatalogSchemaTableName;
-import com.facebook.presto.spi.RLSPredicate;
 import com.facebook.presto.spi.SchemaTableName;
-import com.facebook.presto.spi.connector.ConnectorTransactionHandle;
+import com.facebook.presto.spi.predicate.SpiExpression;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -46,6 +46,7 @@ import static com.facebook.presto.spi.security.AccessDeniedException.denySelectC
 import static com.facebook.presto.spi.security.AccessDeniedException.denySetCatalogSessionProperty;
 import static com.facebook.presto.spi.security.AccessDeniedException.denyShowSchemas;
 import static com.facebook.presto.spi.security.AccessDeniedException.denyShowTablesMetadata;
+import static java.util.Objects.requireNonNull;
 
 public interface SystemAccessControl
 {
@@ -311,8 +312,10 @@ public interface SystemAccessControl
      * TODO
      * @throws com.facebook.presto.spi.security.AccessDeniedException if not allowed
      */
-    default List<RLSPredicate> performRowLevelAuthorization(Identity identity, Privilege privilege, CatalogSchemaTableName table, Set<String> columns)
+    default List<SpiExpression> performRowLevelAuthorization(Identity identity, CatalogSchemaTableName table, Set<String> columns)
     {
-        denyRevokeTablePrivilege(privilege.toString(), table.toString());
+        // TODO
+        requireNonNull(null, "columnNames is null");
+        return new ArrayList<>();
     }
 }

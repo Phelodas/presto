@@ -11,9 +11,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.facebook.presto.spi.predicate;
 
-package com.facebook.presto.spi;
-
-public final class RLSPredicate
+// TODO Json Creator is that needed?
+public abstract class SpiExpression
 {
+    // TODO put in Binary Expression
+    // TODO move class to predicate/
+    //    public enum Operator
+    //    {
+    //        AND, OR;
+    //    }
 }

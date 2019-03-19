@@ -22,6 +22,7 @@ import io.airlift.drift.annotations.ThriftField;
 import io.airlift.drift.annotations.ThriftStruct;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -101,5 +102,23 @@ public final class PrestoThriftEquatableValueSet
             thriftValues.add(fromBlock(value.getBlock(), type));
         }
         return new PrestoThriftEquatableValueSet(valueSet.isWhiteList(), thriftValues);
+    }
+
+    public static EquatableValueSet toEquatableValueSet(PrestoThriftEquatableValueSet valueSet)
+    {
+        List<PrestoThriftBlock> values = valueSet.getValues();
+        Set<ValueEntry> valueEntries = new HashSet<>(values.size());
+        Type baseType = null;
+        for (PrestoThriftBlock value : values) {
+            Type type = value.inferType(); // TODO all types should be same
+            if (baseType == null) {
+                baseType = type;
+            }
+            else {
+                checkState(baseType.equals(type), "Unconformed type in EquatableValueSet:" + baseType + " != " + type);
+            }
+            valueEntries.add(new ValueEntry(type, value.toBlock(value.inferType())));
+        }
+        return new EquatableValueSet(baseType, valueSet.isWhiteList(), valueEntries);
     }
 }

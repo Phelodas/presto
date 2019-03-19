@@ -40,6 +40,7 @@ import static com.facebook.presto.operator.scalar.JsonStringToMapCast.JSON_STRIN
 import static com.facebook.presto.operator.scalar.JsonStringToRowCast.JSON_STRING_TO_ROW_NAME;
 import static com.facebook.presto.operator.scalar.ScalarFunctionImplementation.NullConvention.RETURN_NULL_ON_NULL;
 import static com.facebook.presto.spi.type.BooleanType.BOOLEAN;
+import static com.facebook.presto.spi.type.JsonType.JSON;
 import static com.facebook.presto.spi.type.StandardTypes.ARRAY;
 import static com.facebook.presto.spi.type.StandardTypes.MAP;
 import static com.facebook.presto.spi.type.StandardTypes.ROW;
@@ -59,7 +60,6 @@ import static com.facebook.presto.sql.relational.Signatures.NULL_IF;
 import static com.facebook.presto.sql.relational.Signatures.ROW_CONSTRUCTOR;
 import static com.facebook.presto.sql.relational.Signatures.SWITCH;
 import static com.facebook.presto.sql.relational.Signatures.TRY_CAST;
-import static com.facebook.presto.type.JsonType.JSON;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Predicates.instanceOf;

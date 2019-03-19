@@ -13,11 +13,12 @@
  */
 package com.facebook.presto.spi.connector;
 
-import com.facebook.presto.spi.RLSPredicate;
 import com.facebook.presto.spi.SchemaTableName;
+import com.facebook.presto.spi.predicate.SpiExpression;
 import com.facebook.presto.spi.security.Identity;
 import com.facebook.presto.spi.security.Privilege;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -275,5 +276,10 @@ public interface ConnectorAccessControl
      * TODO
      * @throws com.facebook.presto.spi.security.AccessDeniedException if not allowed
      */
-    public List<RLSPredicate> performRowLevelAuthorization(ConnectorTransactionHandle transactionHandle, Identity identity, Privilege privilege, SchemaTableName tableName, Set<String> columns);
+    default List<SpiExpression> performRowLevelAuthorization(ConnectorTransactionHandle transactionHandle, Identity identity, SchemaTableName tableName, Set<String> columns)
+    {
+        // TODO
+        //requireNonNull(null, "columnNames is null");
+        return new ArrayList<>();
+    }
 }

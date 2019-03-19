@@ -922,6 +922,8 @@ class StatementAnalyzer
             analysis.registerTable(table, tableHandle.get());
 
             // if (// there is security) && not already in the row level security predicate of the table
+            // TODO
+            accessControl.performRowLevelAuthorization(session.getRequiredTransactionId(), session.getIdentity(), name, new HashSet<>());
             if (checkRecursionInRLS(table)) {
                 // TODO Add WHERE
                 Expression literal = new LongLiteral("1");
@@ -961,14 +963,14 @@ class StatementAnalyzer
              * which we shouldn't process again for rewrite since that will result in a recursive loop.
              * However, the WHERE predicate returned from AccessControl should not contain any more references to tab1.
              */
-
+            // TODO
             if (table.isPlaceholderForRLS()) {
-                return true;
+                return false;
             }
             if (analysis.hasTableInRLS(table)) {
                 throw new SemanticException(RLS_PREDICATE_IS_RECURSIVE, table, "Recursive row level security predicate detected");
             }
-            return false;
+            return true;
         }
 
         @Override

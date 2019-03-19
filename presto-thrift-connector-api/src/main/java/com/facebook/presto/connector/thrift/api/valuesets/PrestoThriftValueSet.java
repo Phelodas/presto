@@ -126,6 +126,22 @@ public final class PrestoThriftValueSet
         }
     }
 
+    public static ValueSet toValueSet(PrestoThriftValueSet valueSet)
+    {
+        if (valueSet.getAllOrNoneValueSet() != null) {
+            return PrestoThriftAllOrNoneValueSet.toAllOrNoneValueSet(valueSet.getAllOrNoneValueSet());
+        }
+        else if (valueSet.getEquatableValueSet() != null) {
+            return PrestoThriftEquatableValueSet.toEquatableValueSet(valueSet.getEquatableValueSet());
+        }
+        else if (valueSet.getRangeValueSet() != null) {
+            return PrestoThriftRangeValueSet.toSortedRangeSet(valueSet.getRangeValueSet());
+        }
+        else {
+            throw new IllegalArgumentException("Unknown implementation of a value set: " + valueSet.getClass());
+        }
+    }
+
     private static boolean isExactlyOneNonNull(Object a, Object b, Object c)
     {
         return a != null && b == null && c == null ||

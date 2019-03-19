@@ -16,11 +16,14 @@ package com.facebook.presto.plugin.base.security;
 import com.facebook.presto.spi.CatalogSchemaName;
 import com.facebook.presto.spi.CatalogSchemaTableName;
 import com.facebook.presto.spi.SchemaTableName;
+import com.facebook.presto.spi.predicate.SpiExpression;
 import com.facebook.presto.spi.security.Identity;
 import com.facebook.presto.spi.security.Privilege;
 import com.facebook.presto.spi.security.SystemAccessControl;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -199,5 +202,12 @@ public abstract class ForwardingSystemAccessControl
     public void checkCanRevokeTablePrivilege(Identity identity, Privilege privilege, CatalogSchemaTableName table, String revokee, boolean grantOptionFor)
     {
         delegate().checkCanRevokeTablePrivilege(identity, privilege, table, revokee, grantOptionFor);
+    }
+
+    @Override
+    public List<SpiExpression> performRowLevelAuthorization(Identity identity, CatalogSchemaTableName table, Set<String> columns)
+    {
+        // TODO
+        return new ArrayList<>();
     }
 }

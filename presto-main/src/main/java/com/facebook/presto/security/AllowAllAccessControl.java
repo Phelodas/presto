@@ -15,8 +15,8 @@ package com.facebook.presto.security;
 
 import com.facebook.presto.metadata.QualifiedObjectName;
 import com.facebook.presto.spi.CatalogSchemaName;
-import com.facebook.presto.spi.RLSPredicate;
 import com.facebook.presto.spi.SchemaTableName;
+import com.facebook.presto.spi.predicate.SpiExpression;
 import com.facebook.presto.spi.security.Identity;
 import com.facebook.presto.spi.security.Privilege;
 import com.facebook.presto.transaction.TransactionId;
@@ -164,7 +164,7 @@ public class AllowAllAccessControl
     }
 
     @Override
-    public List<RLSPredicate> performRowLevelAuthorization(TransactionId transactionId, Identity identity, QualifiedObjectName tableName, Set<String> columnNames)
+    public List<SpiExpression> performRowLevelAuthorization(TransactionId transactionId, Identity identity, QualifiedObjectName tableName, Set<String> columnNames)
     {
         return new ArrayList<>();
     }

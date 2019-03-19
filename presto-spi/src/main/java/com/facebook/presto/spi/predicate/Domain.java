@@ -54,6 +54,7 @@ public final class Domain
             @JsonProperty("values") ValueSet values,
             @JsonProperty("nullAllowed") boolean nullAllowed)
     {
+        // TODO check if an instance of TableValueSet then throw an exception
         return new Domain(values, nullAllowed);
     }
 

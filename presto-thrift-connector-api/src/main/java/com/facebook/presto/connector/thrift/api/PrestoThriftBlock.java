@@ -28,8 +28,17 @@ import com.facebook.presto.spi.RecordCursor;
 import com.facebook.presto.spi.RecordSet;
 import com.facebook.presto.spi.block.Block;
 import com.facebook.presto.spi.block.BlockBuilder;
+import com.facebook.presto.spi.type.ArrayType;
 import com.facebook.presto.spi.type.BigintType;
+import com.facebook.presto.spi.type.BooleanType;
+import com.facebook.presto.spi.type.DateType;
+import com.facebook.presto.spi.type.DoubleType;
+import com.facebook.presto.spi.type.HyperLogLogType;
+import com.facebook.presto.spi.type.IntegerType;
+import com.facebook.presto.spi.type.JsonType;
+import com.facebook.presto.spi.type.TimestampType;
 import com.facebook.presto.spi.type.Type;
+import com.facebook.presto.spi.type.VarcharType;
 import io.airlift.drift.annotations.ThriftConstructor;
 import io.airlift.drift.annotations.ThriftField;
 import io.airlift.drift.annotations.ThriftStruct;
@@ -182,6 +191,43 @@ public final class PrestoThriftBlock
     public Block toBlock(Type desiredType)
     {
         return dataReference.toBlock(desiredType);
+    }
+
+    public Type inferType()
+    {
+        if (dataReference.getClass() == PrestoThriftInteger.class) {
+            return IntegerType.INTEGER;
+        }
+        else if (dataReference.getClass() == PrestoThriftBigint.class) {
+            return BigintType.BIGINT;
+        }
+        else if (dataReference.getClass() == PrestoThriftDouble.class) {
+            return DoubleType.DOUBLE;
+        }
+        else if (dataReference.getClass() == PrestoThriftVarchar.class) {
+            return VarcharType.VARCHAR;
+        }
+        else if (dataReference.getClass() == PrestoThriftBoolean.class) {
+            return BooleanType.BOOLEAN;
+        }
+        else if (dataReference.getClass() == PrestoThriftDate.class) {
+            return DateType.DATE;
+        }
+        else if (dataReference.getClass() == PrestoThriftTimestamp.class) {
+            return TimestampType.TIMESTAMP;
+        }
+        else if (dataReference.getClass() == PrestoThriftJson.class) {
+            return JsonType.JSON;
+        }
+        else if (dataReference.getClass() == PrestoThriftHyperLogLog.class) {
+            return HyperLogLogType.HYPER_LOG_LOG;
+        }
+        else if (dataReference.getClass() == PrestoThriftBigintArray.class) {
+            return new ArrayType(BigintType.BIGINT);
+        }
+        else {
+            throw new IllegalArgumentException("Unsupported Presto Thrift Block Type: " + dataReference.getClass());
+        }
     }
 
     public int numberOfRecords()

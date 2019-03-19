@@ -15,8 +15,8 @@ package com.facebook.presto.security;
 
 import com.facebook.presto.metadata.QualifiedObjectName;
 import com.facebook.presto.spi.CatalogSchemaName;
-import com.facebook.presto.spi.RLSPredicate;
 import com.facebook.presto.spi.SchemaTableName;
+import com.facebook.presto.spi.predicate.SpiExpression;
 import com.facebook.presto.spi.security.Identity;
 import com.facebook.presto.spi.security.Privilege;
 import com.facebook.presto.transaction.TransactionId;
@@ -216,5 +216,5 @@ public interface AccessControl
      * TODO
      * @throws com.facebook.presto.spi.security.AccessDeniedException if not allowed
      */
-    public List<RLSPredicate> performRowLevelAuthorization(TransactionId transactionId, Identity identity, QualifiedObjectName tableName, Set<String> columns);
+    public List<SpiExpression> performRowLevelAuthorization(TransactionId transactionId, Identity identity, QualifiedObjectName tableName, Set<String> columns);
 }
